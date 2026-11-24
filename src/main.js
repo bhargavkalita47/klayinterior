@@ -190,7 +190,7 @@
   function openLightbox(image) {
     const page = image.closest(".project-page");
     if (!page || page.hidden) return;
-    gallery = Array.from(page.querySelectorAll(".project-gallery img")).filter(function (img) { return !img.closest(".is-broken"); });
+    gallery = Array.from(page.querySelectorAll(".case-photo img")).filter(function (img) { return !img.closest(".is-broken"); });
     galleryIndex = gallery.indexOf(image);
     if (galleryIndex < 0) return;
     restoreFocus = image;
@@ -200,7 +200,7 @@
     showGalleryPhoto(galleryIndex);
     document.getElementById("lightbox-close").focus();
   }
-  document.querySelectorAll(".project-gallery img").forEach(function (image) {
+  document.querySelectorAll(".case-photo img").forEach(function (image) {
     image.setAttribute("role", "button");
     image.setAttribute("aria-label", "Enlarge photograph: " + image.alt);
     image.addEventListener("click", function () { openLightbox(image); });
