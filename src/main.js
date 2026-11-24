@@ -1,4 +1,4 @@
-/* KLAY — independent dual-direction portfolio concept.
+/* KLAY — independent architectural portfolio concept.
    No tracking, backend, form collection or third-party UI dependencies. */
 (function () {
   "use strict";
@@ -28,31 +28,9 @@
   let touchStartX = null;
   let revealObserver = null;
 
-  function safeGetPreference() {
-    try { return window.localStorage.getItem("klay-concept"); } catch (_) { return null; }
-  }
-  function safeSetPreference(value) {
-    try { window.localStorage.setItem("klay-concept", value); } catch (_) { /* storage optional */ }
-  }
-  function switchConcept(next) {
-    if (next !== "a" && next !== "c") return;
-    body.dataset.concept = next;
-    document.querySelectorAll("[data-set-concept]").forEach(function (button) {
-      const isActive = button.dataset.setConcept === next;
-      button.classList.toggle("is-active", isActive);
-      button.setAttribute("aria-pressed", String(isActive));
-    });
-    document.querySelector('meta[name="theme-color"]').setAttribute("content", next === "a" ? "#f4f1eb" : "#f0f1ed");
-    safeSetPreference(next);
-    if (body.classList.contains("menu-open")) closeMenu(false);
-    requestAnimationFrame(refreshCarousel);
-  }
-
-  const urlPreference = new URLSearchParams(window.location.search).get("concept");
-  switchConcept(urlPreference === "a" || urlPreference === "c" ? urlPreference : (safeGetPreference() === "c" ? "c" : "a"));
-  document.querySelectorAll("[data-set-concept]").forEach(function (button) {
-    button.addEventListener("click", function () { switchConcept(button.dataset.setConcept); });
-  });
+  // Design A is final. Ignore legacy query strings and saved concept choices.
+  body.dataset.concept = "a";
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", "#f4f1eb");
 
   function closeMenu(restore) {
     body.classList.remove("menu-open");
@@ -366,6 +344,20 @@
   window.addEventListener("resize", function () {
     if (!lightbox.hidden) { buildGalleryThumbnails(); updateGalleryThumbnails(); }
   });
+
+  const newsletterForm = document.getElementById("newsletter-signup");
+  if (newsletterForm) {
+    newsletterForm.addEventListener("submit", function (event) {
+      event.preventDefault();
+      if (!newsletterForm.reportValidity()) return;
+      const email = String(new FormData(newsletterForm).get("email") || "").trim();
+      const subject = "KLAY Studio Notes — newsletter signup request";
+      const message = ["Hello KLAY Interior Studio,", "", "I would like to receive your newsletter and studio updates at this email address:", email, "", "Thank you."].join("\n");
+      const status = document.getElementById("newsletter-status");
+      status.textContent = "Send the prepared email to request a subscription. No signup has been recorded by this preview.";
+      window.location.href = "mailto:klayinteriorstudio@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(message);
+    });
+  }
 
   const contactForm = document.getElementById("project-enquiry");
   contactForm.addEventListener("submit", function (event) {
