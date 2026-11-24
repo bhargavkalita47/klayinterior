@@ -1,9 +1,6 @@
 # KLAY Interior Studio — independent redesign concept
 
-Two complete art directions for a proposal website for **KLAY Interior Studio**, Guwahati, Assam.
-
-- **A — Architectural Monograph**: warm ivory, editorial typography, generous whitespace, photography-led portfolio.
-- **C — Contemporary Design Index**: monochrome architectural archive, large modern typography, numbered work index, tighter modular composition.
+The finalized design for **KLAY Interior Studio**, Guwahati, Assam, is **Architectural Monograph (A)**: warm ivory, editorial typography, generous whitespace, photography-led portfolio. The alternate direction is archived in the source and is no longer selectable.
 
 This is an independent, unofficial speculative concept. It is **not** KLAY's official website and has not been endorsed by the studio.
 
@@ -29,16 +26,15 @@ npm run preview
 - No environment variables, paid services, or runtime backend required.
 - The site uses hash navigation, so refreshes and deep links work on any static host.
 - Demo routes: `#/`, `#/work`, `#/studio`, `#/contact`, `#/project/protech-prime`, and the other project routes.
-- Link directly to a concept with `?concept=a` or `?concept=c`. Viewers can switch direction at the top; their selection is saved locally.
 
 ## Included functionality
 
-- Independent design-direction switch with local preference
 - Responsive navigation and accessible mobile menu (close on link, outside header, Escape; focus trap)
 - Projects archive with category filters
 - Four individual project case studies and photo galleries with lightbox, keys and swipe support
 - Studio story and service overview
 - Contact information and a functional email-composer enquiry form (no server-side submission or data storage)
+- Studio Notes newsletter invitation on every route; valid email addresses prepare a subscription-request email, not an actual subscription.
 - Image fallback to KLAY's existing image CDN
 - Focus-visible styles, reduced-motion support, lazy-loading and SEO metadata
 - An explicit noindex rule so this unsolicited preview does not compete with the studio's official site
@@ -53,7 +49,7 @@ Contact details are based on https://klayinteriorstudio.com/index.php/contact/ .
 
 1. Obtain image usage permission, original high-resolution photos, brand assets, final copy and verified studio address.
 2. Export owned photography to optimized responsive AVIF/WebP variants; host it within the approved project.
-3. Decide whether to add an actual hosted enquiry endpoint, privacy terms, spam control and notification routing. The present form is deliberately `mailto:`.
+3. Decide whether to add an actual hosted enquiry endpoint, privacy terms, spam control and notification routing. Both preview forms are deliberately `mailto:`. Connect a consent-aware newsletter provider and a verified signup endpoint before enabling real subscriptions.
 4. Replace noindex with intentional canonical metadata, sitemap and local-business structured data at the official domain.
 5. QA final images, responsive layouts, keyboard navigation and Core Web Vitals on the live hosting provider.
 
