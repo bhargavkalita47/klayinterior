@@ -44,6 +44,8 @@
     });
     document.querySelector('meta[name="theme-color"]').setAttribute("content", next === "a" ? "#f4f1eb" : "#f0f1ed");
     safeSetPreference(next);
+    if (body.classList.contains("menu-open")) closeMenu(false);
+    requestAnimationFrame(refreshCarousel);
   }
 
   const urlPreference = new URLSearchParams(window.location.search).get("concept");
@@ -61,7 +63,9 @@
   }
   function openMenu() {
     if (!window.matchMedia("(max-width: 760px)").matches) return;
+    updateMenuPosition();
     body.classList.add("menu-open");
+    updateMenuPosition();
     menuToggle.setAttribute("aria-expanded", "true");
     menuToggle.setAttribute("aria-label", "Close menu");
     mobileMenu.inert = false;
@@ -80,7 +84,15 @@
   });
   window.addEventListener("resize", function () {
     if (!window.matchMedia("(max-width: 760px)").matches && body.classList.contains("menu-open")) closeMenu(false);
+    updateMenuPosition();
+    refreshCarousel();
   });
+  window.addEventListener("scroll", updateMenuPosition, { passive: true });
+  function updateMenuPosition() {
+    if (body.dataset.concept !== "a" || !body.classList.contains("menu-open")) return;
+    const bottom = document.getElementById("site-header").getBoundingClientRect().bottom;
+    body.style.setProperty("--klay-menu-top", Math.max(70, Math.round(bottom)) + "px");
+  }
 
   function resolveRoute() {
     const path = decodeURIComponent((window.location.hash || "#/").replace(/^#\/?/, "")).replace(/\/+$/, "");
@@ -119,7 +131,7 @@
     document.querySelectorAll("[data-page]").forEach(function (page) {
       page.hidden = page.dataset.page !== route;
     });
-    document.querySelectorAll("[data-nav]").forEach(function (link) {
+    document.querySelectorAll("[data-nav], [data-mobile-link]").forEach(function (link) {
       let url = (link.getAttribute("href") || "").slice(2);
       const current = route === "home" ? url === "" : (route.indexOf("project-") === 0 ? url === "work" : url === route);
       if (current) link.setAttribute("aria-current", "page");
@@ -134,6 +146,7 @@
     }
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     requestAnimationFrame(setupReveal);
+    requestAnimationFrame(refreshCarousel);
   }
   window.addEventListener("hashchange", renderRoute);
   renderRoute();
@@ -174,6 +187,9 @@
     lightbox.hidden = true;
     body.classList.remove("lightbox-open");
     lightboxImage.removeAttribute("src");
+    lightboxImage.classList.remove("klay-photo-in");
+    const thumbs = document.querySelector(".klay-lightbox-thumbs");
+    if (thumbs) thumbs.replaceChildren();
     if (restoreFocus && restoreFocus.isConnected) restoreFocus.focus();
     restoreFocus = null;
   }
@@ -186,6 +202,12 @@
     const caption = item.closest("figure").querySelector("figcaption");
     lightboxCaption.textContent = caption ? caption.textContent : "";
     lightboxCount.textContent = String(galleryIndex + 1).padStart(2, "0") + " / " + String(gallery.length).padStart(2, "0");
+    updateGalleryThumbnails();
+    if (body.dataset.concept === "a" && window.matchMedia("(max-width:760px) and (prefers-reduced-motion:no-preference)").matches) {
+      lightboxImage.classList.remove("klay-photo-in");
+      void lightboxImage.offsetWidth;
+      lightboxImage.classList.add("klay-photo-in");
+    }
   }
   function openLightbox(image) {
     const page = image.closest(".project-page");
@@ -195,6 +217,7 @@
     if (galleryIndex < 0) return;
     restoreFocus = image;
     lightbox.hidden = false;
+    buildGalleryThumbnails();
     body.classList.add("lightbox-open");
     showGalleryPhoto(galleryIndex);
     document.getElementById("lightbox-close").focus();
@@ -224,7 +247,7 @@
       if (event.key === "ArrowRight") showGalleryPhoto(galleryIndex + 1);
       if (event.key === "ArrowLeft") showGalleryPhoto(galleryIndex - 1);
       if (event.key === "Tab") {
-        const focusables = [document.getElementById("lightbox-close"), document.getElementById("lightbox-prev"), document.getElementById("lightbox-next")];
+        const focusables = [document.getElementById("lightbox-close"), document.getElementById("lightbox-prev"), document.getElementById("lightbox-next")].concat(Array.from(lightbox.querySelectorAll(".klay-lightbox-thumbs button")).filter(function (button) { return button.getClientRects().length > 0; }));
         const activeIndex = focusables.indexOf(document.activeElement);
         if (activeIndex >= 0) {
           event.preventDefault();
@@ -242,6 +265,106 @@
         focusable[(index + (event.shiftKey ? focusable.length - 1 : 1)) % focusable.length].focus();
       }
     }
+  });
+
+  // KLAY mobile component adaptations. Native DOM + scroll snapping, no runtime dependencies.
+  // References: Spell UI Slide Up Text, BagUI responsive navbar, UI TripleD gallery/lightbox.
+  const mobileA = function () { return body.dataset.concept === "a" && window.matchMedia("(max-width:760px)").matches; };
+  const editorialGrid = document.querySelector(".editorial-grid");
+  let carouselControls = null;
+  let carouselIndex = 0;
+  let carouselFrame = 0;
+
+  function refreshCarousel() {
+    if (!carouselControls || !editorialGrid || !mobileA() || !editorialGrid.clientWidth) return;
+    const cards = Array.from(editorialGrid.querySelectorAll(".editorial-project"));
+    const left = editorialGrid.getBoundingClientRect().left + parseFloat(getComputedStyle(editorialGrid).paddingLeft);
+    const max = editorialGrid.scrollWidth - editorialGrid.clientWidth;
+    carouselIndex = cards.reduce(function (nearest, card, i) {
+      return Math.abs(card.getBoundingClientRect().left - left) < Math.abs(cards[nearest].getBoundingClientRect().left - left) ? i : nearest;
+    }, 0);
+    if (max > 0 && editorialGrid.scrollLeft >= max - 3) carouselIndex = cards.length - 1;
+    carouselControls.querySelector(".klay-carousel-count").textContent = String(carouselIndex + 1).padStart(2, "0") + " / " + String(cards.length).padStart(2, "0");
+    carouselControls.style.setProperty("--klay-progress", ((carouselIndex + 1) / cards.length * 100) + "%");
+    carouselControls.querySelector("[data-carousel-prev]").disabled = carouselIndex === 0;
+    carouselControls.querySelector("[data-carousel-next]").disabled = carouselIndex === cards.length - 1;
+  }
+  function moveCarousel(direction) {
+    const cards = Array.from(editorialGrid.querySelectorAll(".editorial-project"));
+    const next = Math.max(0, Math.min(cards.length - 1, carouselIndex + direction));
+    const left = editorialGrid.getBoundingClientRect().left + parseFloat(getComputedStyle(editorialGrid).paddingLeft);
+    const offset = cards[next].getBoundingClientRect().left - left + editorialGrid.scrollLeft;
+    editorialGrid.scrollTo({left:offset,behavior:window.matchMedia("(prefers-reduced-motion:reduce)").matches ? "instant" : "smooth"});
+  }
+  if (editorialGrid) {
+    editorialGrid.id = "klay-selected-projects";
+    editorialGrid.classList.add("klay-carousel");
+    carouselControls = document.createElement("div");
+    carouselControls.className = "klay-carousel-controls";
+    carouselControls.setAttribute("role", "group");
+    carouselControls.setAttribute("aria-label", "Selected projects navigation");
+    carouselControls.innerHTML = '<span class="klay-carousel-count" aria-live="polite">01 / 04</span><div class="klay-carousel-progress" aria-hidden="true"><span></span></div><button type="button" data-carousel-prev aria-label="Previous project" aria-controls="klay-selected-projects" disabled>←</button><button type="button" data-carousel-next aria-label="Next project" aria-controls="klay-selected-projects">→</button>';
+    editorialGrid.after(carouselControls);
+    carouselControls.querySelector("[data-carousel-prev]").addEventListener("click", function () { moveCarousel(-1); });
+    carouselControls.querySelector("[data-carousel-next]").addEventListener("click", function () { moveCarousel(1); });
+    editorialGrid.addEventListener("scroll", function () {
+      if (carouselFrame) return;
+      carouselFrame = requestAnimationFrame(function () { carouselFrame = 0; refreshCarousel(); });
+    }, { passive:true });
+    requestAnimationFrame(refreshCarousel);
+  }
+
+  const heroTitle = document.getElementById("hero-a-title");
+  if (heroTitle) {
+    const walker = document.createTreeWalker(heroTitle, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    let wordIndex = 0;
+    heroTitle.setAttribute("aria-label", heroTitle.innerText.replace(/\s+/g, " ").trim() || "Your space must do the talking.");
+    nodes.forEach(function (node) {
+      if (node.parentElement.classList.contains("hero-a__period")) return;
+      const fragment = document.createDocumentFragment();
+      node.nodeValue.split(/(\s+)/).filter(Boolean).forEach(function (piece) {
+        if (/^\s+$/.test(piece)) { fragment.append(document.createTextNode(piece)); return; }
+        const mask = document.createElement("span");
+        const word = document.createElement("span");
+        mask.className = "klay-word-mask";
+        mask.style.setProperty("--klay-word-index", wordIndex++);
+        word.textContent = piece;
+        mask.append(word);
+        fragment.append(mask);
+      });
+      node.replaceWith(fragment);
+    });
+    heroTitle.classList.add("klay-staggered");
+  }
+
+  const galleryThumbs = document.createElement("div");
+  galleryThumbs.className = "klay-lightbox-thumbs";
+  galleryThumbs.setAttribute("role","group");
+  galleryThumbs.setAttribute("aria-label","Choose a project photograph");
+  lightbox.append(galleryThumbs);
+  function buildGalleryThumbnails() {
+    galleryThumbs.replaceChildren();
+    if (!mobileA()) return;
+    gallery.forEach(function (photo, i) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.setAttribute("aria-label", "View photograph " + (i + 1) + ": " + photo.alt);
+      const thumbnail = document.createElement("img");
+      thumbnail.src = photo.currentSrc || photo.src;
+      thumbnail.alt = "";
+      button.append(thumbnail);
+      button.addEventListener("click", function () { showGalleryPhoto(i); });
+      galleryThumbs.append(button);
+    });
+  }
+  function updateGalleryThumbnails() {
+    if (!galleryThumbs) return;
+    Array.from(galleryThumbs.children).forEach(function (button,i) { button.setAttribute("aria-pressed", String(i === galleryIndex)); });
+  }
+  window.addEventListener("resize", function () {
+    if (!lightbox.hidden) { buildGalleryThumbnails(); updateGalleryThumbnails(); }
   });
 
   const contactForm = document.getElementById("project-enquiry");
