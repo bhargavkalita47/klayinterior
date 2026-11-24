@@ -779,3 +779,31 @@ body[data-concept=a] a:focus-visible,body[data-concept=a] button:focus-visible{o
 @media(prefers-reduced-motion:reduce){
  body[data-concept=a] .mobile-menu,body[data-concept=a] .mobile-menu__inner>a{transition:none!important}
 }
+
+
+/* Final monograph — newsletter invitation shared across all routes. */
+.newsletter{background:var(--paper2);padding-top:clamp(40px,6vw,94px);padding-bottom:clamp(44px,6vw,96px)}
+.newsletter__inner{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.8fr);gap:clamp(32px,7vw,112px);align-items:end;border-top:1px solid var(--line);padding-top:28px}
+.newsletter__copy{min-width:0}
+.newsletter__copy h2{font-family:var(--display);font-size:clamp(48px,6vw,94px);line-height:.94;letter-spacing:-.045em;margin:13px 0 19px}
+.newsletter__copy p:not(.eyebrow){font-size:15px;line-height:1.7;max-width:43ch}
+.newsletter__form{min-width:0}
+.newsletter__form label{display:block;font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-bottom:7px}
+.newsletter__field{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;border-bottom:1px solid var(--ink)}
+.newsletter__field input{min-width:0;width:100%;padding:13px 10px 13px 0;background:transparent;border:0;border-radius:0;color:var(--ink);font-size:16px;line-height:1.4}
+.newsletter__field input::placeholder{color:var(--muted)}
+.newsletter__field button{display:flex;align-items:center;justify-content:space-between;gap:22px;border:0;background:var(--ink);color:var(--paper);font-weight:600;font-size:12px;letter-spacing:.025em;padding:12px 18px;min-height:48px;transition:background-color .18s ease,transform .18s ease}
+.newsletter__field button:hover{background:#42443b}
+.newsletter__field button:active{transform:scale(.98)}
+.newsletter__field button span{font-size:17px;font-weight:400;line-height:1}
+.newsletter__note,.newsletter__status{font-size:12px;color:var(--muted);line-height:1.6;margin-top:12px}
+.newsletter__status:not(:empty){color:var(--ink);font-weight:500}
+@media(max-width:760px){
+ body[data-concept=a] .mobile-menu{inset:var(--klay-menu-top,70px) 0 0}
+ .newsletter{padding-block:40px 46px}
+ .newsletter__inner{grid-template-columns:minmax(0,1fr);gap:26px;padding-top:18px}
+ .newsletter__copy h2{font-size:clamp(46px,12vw,72px);margin:12px 0 15px}
+ .newsletter__copy p:not(.eyebrow){font-size:15px}
+ .newsletter__field button{padding-inline:13px;gap:12px;min-height:52px}
+}
+@media(max-width:350px){.newsletter__field button{gap:8px;padding-inline:10px;font-size:11px}}
