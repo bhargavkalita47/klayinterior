@@ -640,3 +640,26 @@ body.lightbox-open{overflow:hidden}
  body[data-concept=a] a:hover .project-meta__arrow{transform:none}
  body[data-concept=a] .cta-section__link:hover>span:last-child{transform:none}
 }
+
+
+/* Mobile A motion study: framework-free interpretation of Spell UI's
+   Slide Up Text (https://spell.sh/docs/slide-up-text).
+   Staggered section entry with no React runtime or animation dependency. */
+@media (max-width:760px) and (prefers-reduced-motion:no-preference){
+ body[data-concept=a] .hero-a__title-wrap h1{animation:klay-monograph-slide .65s cubic-bezier(.625,.05,0,1) both}
+ body[data-concept=a] .hero-a__image-wrap{animation:klay-monograph-photo .75s cubic-bezier(.625,.05,0,1) .09s both}
+ body[data-concept=a] .hero-a__intro{animation:klay-monograph-slide .55s cubic-bezier(.625,.05,0,1) .16s both}
+ body[data-concept=a] .mobile-menu__inner>a{transition:transform .32s var(--ease),opacity .32s var(--ease);transform:translateY(8px);opacity:0}
+ body[data-concept=a].menu-open .mobile-menu__inner>a{transform:none;opacity:1}
+ body[data-concept=a].menu-open .mobile-menu__inner>a:nth-of-type(2){transition-delay:35ms}
+ body[data-concept=a].menu-open .mobile-menu__inner>a:nth-of-type(3){transition-delay:70ms}
+ body[data-concept=a].menu-open .mobile-menu__inner>a:nth-of-type(4){transition-delay:105ms}
+}
+@keyframes klay-monograph-slide{
+ from{opacity:0;transform:translateY(12px)}
+ to{opacity:1;transform:none}
+}
+@keyframes klay-monograph-photo{
+ from{opacity:.65;clip-path:inset(5% 0 0 0)}
+ to{opacity:1;clip-path:inset(0)}
+}
